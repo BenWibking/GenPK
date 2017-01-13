@@ -5,6 +5,7 @@ GREAD=${CURDIR}/GadgetReader
 #If Gadget was compiled with double precision output, you should define this flag
 #to read it correctly
 #OPT = -DDOUBLE_PRECISION
+OPT = -DNOBIGFILE
 
 #Check for a pkgconfig; if one exists we are probably debian.
 ifeq ($(shell pkg-config --exists hdf5-serial && echo 1),1)
@@ -14,7 +15,7 @@ else
 	HDF_LINK = -lhdf5 -lhdf5_hl
 endif
 
-LFLAGS += -lfftw3_threads -lfftw3 -lpthread -lrgad -L${GREAD} -Wl,-rpath,$(GREAD),--no-add-needed,--as-needed $(HDF_LINK) -Lbigfile/src -lbigfile
+LFLAGS += -lfftw3_threads -lfftw3 -lpthread -lrgad -L${GREAD} -Wl,-rpath,$(GREAD),--no-add-needed,--as-needed $(HDF_LINK) #-Lbigfile/src -lbigfile
 #Are we using gcc or icc?
 ifeq (icc,$(findstring icc,${CC}))
   CFLAGS +=-O2 -g -c -w1 -openmp $(OPT) -I${GREAD}
@@ -28,7 +29,7 @@ PRO=#-pg
 #gcc
 PPFLAGS:=$(CFLAGS)
 CXXFLAGS+= $(PPFLAGS)
-objs = powerspectrum.o fieldize.o read_fieldize.o utils.o read_fieldize_bigfile.o
+objs = powerspectrum.o fieldize.o read_fieldize.o utils.o #read_fieldize_bigfile.o
 .PHONY:all love clean test dist
 
 all: librgad.so gen-pk
@@ -43,10 +44,10 @@ $(GREAD)/Makefile:
 librgad.so: $(GREAD)/Makefile
 	cd $(GREAD); VPATH=$(GREAD) make $@
 
-read_fieldize_bigfile.o: bigfile/src/libbigfile.a
+#read_fieldize_bigfile.o: bigfile/src/libbigfile.a
 
-bigfile/src/libbigfile.a:
-	cd bigfile/src; VPATH=bigfile/src MPICC=$(CC) make libbigfile.a
+#bigfile/src/libbigfile.a:
+#	cd bigfile/src; VPATH=bigfile/src MPICC=$(CC) make libbigfile.a
 
 powerspectrum.o: powerspectrum.c
 	$(CC) -std=gnu99 $(CFLAGS) $^
